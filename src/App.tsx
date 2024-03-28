@@ -1,18 +1,31 @@
 import { useRef, useState } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import {
   RenderTexture,
   OrbitControls,
   PerspectiveCamera,
   Text,
   ContactShadows,
+  useTexture,
 } from "@react-three/drei";
 import { suspend } from "suspend-react";
+import { TextureLoader } from "three/src/loaders/TextureLoader";
+
 const inter = import("../fonts/Prompt-Black.ttf");
 
 import "./App.css";
 
 function Box(props) {
+  const colorMap = useLoader(TextureLoader, "./fluke.jpg");
+
+  const cmap = useTexture({
+    map: "fluke.jpg",
+    // displacementMap: "fluke.jpg",
+    // normalMap: "fluke.jpg",
+    // roughnessMap: "fluke.jpg",
+    aoMap: "fluke.jpg",
+  });
+
   // This reference gives us direct access to the THREE.Mesh object
   const ref = useRef();
   // Hold state for hovered and clicked events
@@ -29,13 +42,16 @@ function Box(props) {
     <mesh
       {...props}
       ref={ref}
-      scale={clicked ? 1.5 : 1}
+      scale={clicked ? 2.5 : 1}
       onClick={(event) => click(!clicked)}
       onPointerOver={(event) => (event.stopPropagation(), hover(true))}
       onPointerOut={(event) => hover(false)}
     >
       <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color={hovered ? "hotpink" : "orange"}>
+      <meshStandardMaterial
+        // color={hovered ? "hotpink" : "orange"}
+        {...cmap}
+      >
         <RenderTexture attach="map" anisotropy={16}>
           <PerspectiveCamera
             makeDefault
@@ -43,13 +59,13 @@ function Box(props) {
             aspect={1 / 1}
             position={[0, 0, 5]}
           />
-          <color attach="background" args={["orange"]} />
+          <color attach="background" args={["white"]} />
           <ambientLight intensity={0.5} />
-          <directionalLight position={[10, 10, 5]} />
+          <directionalLight position={[10, 5, 5]} />
           <Text
             font={suspend(inter).default}
             ref={textRef}
-            fontSize={2}
+            fontSize={0.5}
             color="#555"
           >
             {props.text || ""}
@@ -72,8 +88,8 @@ export default function App() {
         intensity={Math.PI}
       />
       <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-      <Box position={[-1.2, 0, 0]} text={"IE"} />
-      <Box position={[1.2, 0, 0]} text={"CMU"} />
+      <Box position={[-1.5, 0, 0]} text={"Motion"} />
+      <Box position={[1.5, 0, 0]} text={"Study"} />
       <OrbitControls />
     </Canvas>
   );
